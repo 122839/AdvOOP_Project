@@ -1,0 +1,118 @@
+import java.sql.*;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
+public class DBOperations {
+
+    DBConnection dbcon = new DBConnection();
+
+    public void insert(String id, String name, String course) {
+        try {
+            String query = "INSERT INTO students(student_id, student_name,student_course) VALUES(?,?,?);";
+
+            PreparedStatement pStmt = dbcon.con.prepareStatement(query);
+
+            //setting the placeholders. 1st placeholder is ID, 2nd is name, 3rd is course
+            pStmt.setString(1, id);
+            pStmt.setString(2, name);
+            pStmt.setString(3, course);
+
+            int affectedRow = pStmt.executeUpdate();
+            System.out.println("The rows inserted are rows: " + affectedRow);
+            pStmt.close();
+        } catch (SQLException g) {
+            System.out.println("Failed to insert " + g.getMessage());
+        }
+    }
+
+    public void select(String id, VBox resultSection) {
+        try {
+            String query = "SELECT * FROM students WHERE student_id= ?;";
+            PreparedStatement pst = dbcon.con.prepareStatement(query);
+            pst.setString(1, id);
+
+            ResultSet rs = pst.executeQuery();
+            
+            resultSection.getChildren().clear();
+            
+            if (rs.next()) {
+            String studentId = rs.getString("student_id");
+            String studentName = rs.getString("student_name");
+            String studentCourse = rs.getString("student_course");
+
+            Label resultLabel = new Label("Student: " + studentId + "  " + studentName + "  " + studentCourse);
+            resultSection.getChildren().add(resultLabel);
+           
+            while (rs.next()) {
+                System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3));
+                resultLabel = new Label("Student: " + studentId + "  " +studentName + "  " + studentCourse);
+                resultSection.getChildren().add(resultLabel);
+            } }
+            else{ 
+                Label noResultLabel = new Label("No results found for ID: " + id);
+                resultSection.getChildren().add(noResultLabel);
+            }
+            rs.close();
+            pst.close();
+
+        } catch (SQLException d) {
+            System.out.println("Operation not completed :| " + d.getMessage());
+            Label errorLabel = new Label("Error retrieving data.");
+            resultSection.getChildren().add(errorLabel);
+        }
+    }
+
+    public void update(String id, String name, String course) {
+        try {
+            String query = "UPDATE students SET student_name = ?, student_course=? WHERE student_id=?;";
+            PreparedStatement ps = dbcon.con.prepareStatement(query);
+
+            ps.setString(1, name);
+            ps.setString(2, course);
+            ps.setString(1, id);
+
+            int rowsAffected = ps.executeUpdate();
+            System.out.println("The updated rows are row: " + rowsAffected);
+
+            ps.close();
+        } catch (SQLException u) {
+            System.out.println("Failed to update " + u.getMessage());
+        }
+    }
+
+    public void delete(String id) {
+        try {
+            PreparedStatement st = dbcon.con.prepareStatement("DELETE FROM students WHERE student_id=?;");
+
+            st.setString(1, id);
+            int deletedRow = st.executeUpdate();
+            System.out.println("You have deleted row: " + deletedRow);
+
+            st.close();
+        } catch (SQLException o) {
+            System.out.println("Deletion not completed " + o.getMessage());
+        }
+    }
+    
+    public void display(){
+        try{
+            PreparedStatement pt = dbcon.con.prepareStatement("SELECT * FROM students");
+    
+            ResultSet rs = pt.executeQuery();
+    
+            while(rs.next()){
+                String studentId= rs.getString("student_id");
+                String studentName= rs.getString("student_name");
+                String studentCourse= rs.getString("student_course");
+      
+            System.out.println("Studet ID: "+studentId + "  Name: "+ studentName+ "  Course: "+studentCourse);
+            }
+       
+        rs.close();
+        pt.close();
+ 
+        }catch(SQLException j){
+         System.out.println("Failed to display data "+j.getMessage());
+    }
+  }
+}
