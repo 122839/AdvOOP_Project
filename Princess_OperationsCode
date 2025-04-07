@@ -1,6 +1,5 @@
 import java.sql.*;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import java.rmi.RemoteException;
 
 public class DBOperations {
 
@@ -25,42 +24,44 @@ public class DBOperations {
         }
     }
 
-    public void select(String id, VBox resultSection) {
-        try {
-            String query = "SELECT * FROM students WHERE student_id= ?;";
-            PreparedStatement pst = dbcon.con.prepareStatement(query);
-            pst.setString(1, id);
+    public String select(String id) throws RemoteException {
+    try {
+        String query = "SELECT * FROM students WHERE student_id= ?;";
+        PreparedStatement pst = dbcon.con.prepareStatement(query);
+        pst.setString(1, id);
 
-            ResultSet rs = pst.executeQuery();
-            
-            resultSection.getChildren().clear();
-            
-            if (rs.next()) {
+        ResultSet rs = pst.executeQuery();
+        
+        StringBuilder result = new StringBuilder();
+        
+        if (rs.next()) {
             String studentId = rs.getString("student_id");
             String studentName = rs.getString("student_name");
             String studentCourse = rs.getString("student_course");
-
-            Label resultLabel = new Label("Student: " + studentId + "  " + studentName + "  " + studentCourse);
-            resultSection.getChildren().add(resultLabel);
-           
+            
+            result.append("Student: ").append(studentId).append("  ")
+                  .append(studentName).append("  ").append(studentCourse);
+            
             while (rs.next()) {
-                System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getString(3));
-                resultLabel = new Label("Student: " + studentId + "  " +studentName + "  " + studentCourse);
-                resultSection.getChildren().add(resultLabel);
-            } }
-            else{ 
-                Label noResultLabel = new Label("No results found for ID: " + id);
-                resultSection.getChildren().add(noResultLabel);
+                studentId = rs.getString("student_id");
+                studentName = rs.getString("student_name");
+                studentCourse = rs.getString("student_course");
+                result.append("\nStudent: ").append(studentId).append("  ")
+                      .append(studentName).append("  ").append(studentCourse);
             }
-            rs.close();
-            pst.close();
-
-        } catch (SQLException d) {
-            System.out.println("Operation not completed :| " + d.getMessage());
-            Label errorLabel = new Label("Error retrieving data.");
-            resultSection.getChildren().add(errorLabel);
+        } else {
+            result.append("No results found for ID: ").append(id);
         }
+        
+        rs.close();
+        pst.close();
+        return result.toString();
+
+    } catch (SQLException d) {
+        System.out.println("Operation not completed :| " + d.getMessage());
+        return "Error retrieving data.";
     }
+}
 
     public void update(String id, String name, String course) {
         try {
@@ -115,4 +116,43 @@ public class DBOperations {
          System.out.println("Failed to display data "+j.getMessage());
     }
   }
+
+public String displayWithDepartment(String departmentName) throws RemoteException {
+    try {
+        String query = "SELECT students.student_id, students.student_name, department.department_name " +
+                      "FROM students JOIN courses ON students.student_course = courses.course_name " +
+                      "JOIN department ON courses.department_name = department.department_name " +
+                      "WHERE department.department_name = ?";
+        
+        PreparedStatement pt = dbcon.con.prepareStatement(query);
+        pt.setString(1, departmentName);
+        ResultSet rs = pt.executeQuery();
+        
+        StringBuilder result = new StringBuilder();
+        
+        if (rs.next()) {
+            do {
+                String studentId = rs.getString("student_id");
+                String studentName = rs.getString("student_name");
+                String deptName = rs.getString("department_name");
+                
+                result.append("Student: ")
+                      .append(studentId).append("  ")
+                      .append(studentName).append("  ")
+                      .append(deptName).append("\n");
+                
+            } while (rs.next());
+        } else {
+            result.append("No students in department: ").append(departmentName);
+        }
+        
+        rs.close();
+        pt.close();
+        return result.toString().trim(); // Remove trailing newline
+        
+    } catch (SQLException e) {
+        System.out.println("Query failed: " + e.getMessage());
+        return "Error loading department data";
+    }
+}
 }
