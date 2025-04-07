@@ -1,0 +1,41 @@
+import java.rmi.RemoteException;
+import Server.DBOperations1;
+import java.rmi.server.UnicastRemoteObject;
+
+public class StudentDBImplementation extends UnicastRemoteObject implements StudentDBInterface {
+    DBOperations1 operate= new DBOperations1();
+
+    public StudentDBImplementation() throws RemoteException{
+        
+    }   
+    @Override
+    public void insert(String id, String name, String course) throws RemoteException {
+     operate.insert(id, name, course);
+    }
+
+    @Override
+    public void select(String id) throws RemoteException {
+       operate.select(id);
+    }
+
+    @Override
+    public void update(String id, String name, String course) throws RemoteException {
+      operate.update(id, name, course);
+    }
+
+    @Override
+    public void delete(String id) throws RemoteException {
+       operate.delete(id);
+    }
+
+    @Override
+    public void display() throws RemoteException {
+       operate.display();
+    }
+    
+    @Override
+    public void displayWithDepartment(String department_name) throws RemoteException {
+        operate.displayWithDepartment(department_name);
+    }
+    
+}
