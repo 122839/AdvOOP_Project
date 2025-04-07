@@ -19,6 +19,7 @@ public class GUITwo extends Application{
     private TextField idTxtf = new TextField();
     private TextField nameTxtf = new TextField();
     private TextField courseTxtf = new TextField();
+    private TextField departmentTxtf = new TextField();
     private VBox resultSection = new VBox(10);
 
     @Override
@@ -29,11 +30,13 @@ public class GUITwo extends Application{
         Label idLbl = new Label("ID:");
         Label nameLbl = new Label("Name:");
         Label courseLbl = new Label("Course:");
+        Label departmentLbl= new Label ("Department Name:");
 
         Button create = new Button("CREATE");
         Button select = new Button("READ");
         Button update = new Button("UPDATE");
         Button delete = new Button("DELETE");
+        Button displayDpt = new Button ("JOIN");
 
         
         Font fontalt = Font.font("Georgia", FontWeight.NORMAL, 13);
@@ -44,16 +47,19 @@ public class GUITwo extends Application{
         idLbl.setFont(fontalt2);
         nameLbl.setFont(fontalt2);
         courseLbl.setFont(fontalt2);
+        departmentLbl.setFont(fontalt2);
         Font fontalt3 = Font.font("Courier New", FontWeight.EXTRA_BOLD, 10);
         create.setFont(fontalt3);
         select.setFont(fontalt3);
         update.setFont(fontalt3);
         delete.setFont(fontalt3);
+        displayDpt.setFont(fontalt3);
         
         create.setStyle("-fx-background-color: limegreen; -fx-text-fill: white;"); 
         select.setStyle("-fx-background-color: limegreen; -fx-text-fill: white;");
         update.setStyle("-fx-background-color: limegreen; -fx-text-fill: white;");
         delete.setStyle("-fx-background-color: limegreen; -fx-text-fill: white;");
+        displayDpt.setStyle("-fx-background-color: limegreen; -fx-text-fill: white;");
         
         VBox topLabels = new VBox(6);
         topLabels.setAlignment(Pos.TOP_CENTER);
@@ -71,10 +77,12 @@ public class GUITwo extends Application{
         inputGrid.add(nameTxtf, 1, 1);
         inputGrid.add(courseLbl, 0, 2);
         inputGrid.add(courseTxtf, 1, 2);
+        inputGrid.add(departmentLbl, 0,3);
+        inputGrid.add(departmentTxtf, 1, 3);
         
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.getChildren().addAll(create, select,update,delete);
+        buttonBox.getChildren().addAll(create, select,update,delete,displayDpt);
         buttonBox.setPadding(new javafx.geometry.Insets(10));
 
         resultSection.setPrefWidth(400);
@@ -98,6 +106,7 @@ public class GUITwo extends Application{
         select.setOnAction(e -> handleSelect());
         update.setOnAction(e -> handleUpdate());
         delete.setOnAction(e -> handleDelete());
+        displayDpt.setOnAction(e -> handleDisplayWithDepartment());
     }
     
         private void handleCreate(){
@@ -106,7 +115,7 @@ public class GUITwo extends Application{
             String course = courseTxtf.getText().trim();
 
             if (!id.isEmpty() && !name.isEmpty() && !course.isEmpty()) {
-            DBOperations dbop = new DBOperations();
+            DBOperations1 dbop = new DBOperations1();
             dbop.insert(id, name, course);
             showInfo("Record inserted successfully.");
              } else {
@@ -114,11 +123,11 @@ public class GUITwo extends Application{
          }
         }
 
-        private void handleSelect(){
+        private void handleSelect() throws RemoteException{
            String id = idTxtf.getText().trim();
            if (!id.isEmpty()) {
-            DBOperations dbop = new DBOperations();
-            dbop.select(id, resultSection);
+            DBOperations1 dbop = new DBOperations1();
+            dbop.select(id);
             resultSection.setVisible(true);
             } else {
             showWarning("Please enter an ID.");
@@ -131,7 +140,7 @@ public class GUITwo extends Application{
         String course = courseTxtf.getText().trim();
 
         if (!id.isEmpty() && !name.isEmpty() && !course.isEmpty()) {
-            DBOperations dbop = new DBOperations();
+            DBOperations1 dbop = new DBOperations1();
             dbop.update(id, name, course);
             showInfo("Record updated successfully.");
         } else {
@@ -142,13 +151,24 @@ public class GUITwo extends Application{
         private void handleDelete() {
         String id = idTxtf.getText().trim();
         if (!id.isEmpty()) {
-            DBOperations dbop = new DBOperations();
+            DBOperations1 dbop = new DBOperations1();
             dbop.delete(id);
             showInfo("Record deleted successfully.");
         } else {
             showWarning("Please enter an ID.");
         }
     }
+        
+        private void handleDisplayWithDepartment() throws RemoteException{
+            String department_name = departmentTxtf.getText().trim();
+            if(!department_name.isEmpty()){
+                DBOperations1 dbop = new DBOperations1();
+                dbop.displayWithDepartment(department_name);
+                resultSection.setVisible(true);
+            } else{
+                showWarning("Please enter department name");
+            }
+        }
         
         private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK);
@@ -164,5 +184,4 @@ public class GUITwo extends Application{
     public static void main(String[] args) {
         launch(args);
     }
-    
 }
