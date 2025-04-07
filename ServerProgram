@@ -1,0 +1,20 @@
+import java.nio.channels.AlreadyBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.Remote;
+
+public class ServerProgram {
+    public static void main(String[] args) throws java.rmi.AlreadyBoundException {
+        
+        try{
+       StudentDBImplementation implement = new StudentDBImplementation();
+       Registry registry = LocateRegistry.createRegistry(1099);
+       registry.bind("StudentDB", (Remote) implement);
+    } catch (RemoteException e){
+        e.printStackTrace();  
+    } catch(AlreadyBoundException ex){
+        ex.printStackTrace();
+    }
+  }
+}
